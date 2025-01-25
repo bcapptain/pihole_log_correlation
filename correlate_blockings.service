@@ -1,0 +1,14 @@
+[Unit]
+
+Description=Starts the PiHole Domain block correlation logging
+After=network.target docker.service
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/opt/pihole
+Restart=always
+Type=simple
+ExecStart=/opt/pihole/correlate_blockings.py
+
+[Install]
+WantedBy=multi-user.target
