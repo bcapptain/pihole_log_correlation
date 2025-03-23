@@ -55,6 +55,23 @@ This script correlates PiHole query logs with blocked domain entries to show whi
    sudo systemctl start correlate_blockings.service
    ```
 
+## Docker Configuration
+
+If you're running PiHole in Docker, you need to modify your Docker Compose configuration to mount the log directory as a volume. This ensures that the logs are accessible to the host system where this script runs.
+
+Add the following volume configuration to your PiHole service in `docker-compose.yml`:
+
+```yaml
+services:
+  pihole:
+    # ... other configuration ...
+    volumes:
+      - './log-pihole:/var/log/pihole'
+      # ... other volumes ...
+```
+
+This maps the container's log directory to a local directory on your host system, allowing the correlation script to access the logs.
+
 ## Usage
 
 The script runs automatically as a service and writes correlated logs to `/opt/pihole/log-pihole/blockings.log`.
@@ -83,6 +100,7 @@ If the service fails to start:
 2. Check the logs: `journalctl -u correlate_blockings.service`
 3. Verify PiHole is running and accessible
 4. Ensure the log directory exists and has proper permissions
+5. For Docker installations, verify that the log volume is properly mounted
 
 ## License
 
