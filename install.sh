@@ -18,12 +18,24 @@ check_root() {
     fi
 }
 
-# Function to check if PiHole is installed
+# Function to check if PiHole is installed (either natively or in Docker)
 check_pihole() {
-    if ! command -v pihole &> /dev/null; then
-        echo -e "${RED}PiHole is not installed. Please install PiHole first.${NC}"
-        exit 1
+    # Check for native PiHole installation
+    if command -v pihole &> /dev/null; then
+        echo -e "${GREEN}Found native PiHole installation${NC}"
+        return 0
     fi
+
+    # Check for PiHole Docker container
+    if command -v docker &> /dev/null; then
+        if docker ps --format '{{.Names}}' | grep -q "pihole"; then
+            echo -e "${GREEN}Found PiHole running in Docker${NC}"
+            return 0
+        fi
+    fi
+
+    echo -e "${RED}PiHole is not installed (neither natively nor in Docker). Please install PiHole first.${NC}"
+    exit 1
 }
 
 # Main installation process
