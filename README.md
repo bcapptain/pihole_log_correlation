@@ -1,60 +1,88 @@
-# PiHole Domain Block Correlation Logging
+# PiHole Block Correlation
 
-A script that correlates "query" and "blocked" log lines from the Pi-hole log by adding the client IP from the "query" line to the "blocked" line and outputs it to a separate log file.
+This script correlates PiHole query logs with blocked domain entries to show which IP addresses triggered the blocks.
 
-## Files
+## Features
 
-- `correlate_blockings.py`: The Python script that monitors the PiHole log file and logs domain block correlations.
-- `correlate_blockings.service`: The systemd service file to run the script automatically on startup.
+- Real-time correlation of PiHole query and block logs
+- Shows IP addresses that triggered blocked domains
+- Handles log rotation automatically
+- Works with both native PiHole installations and Docker containers
+- Runs as a systemd service
 
 ## Installation
 
-1. **Clone the Repository**:
-    ```sh
-    git clone https://github.com/yourusername/pihole-domain-block-correlation.git
-    cd pihole-domain-block-correlation
-    ```
+### Using the Installation Script (Recommended)
 
-2. **Copy the Script and Service File**:
-    ```sh
-    sudo cp correlate_blockings.py /opt/pihole/
-    sudo cp correlate_blockings.service /etc/systemd/system/
-    ```
+1. Clone this repository or download the files:
+   - `correlate_blockings.py`
+   - `correlate_blockings.service`
+   - `install.sh`
 
-3. **Set Permissions**:
-    ```sh
-    sudo chmod +x /opt/pihole/correlate_blockings.py
-    ```
+2. Make the installation script executable:
+   ```bash
+   chmod +x install.sh
+   ```
 
-4. **Reload Systemd**:
-    ```sh
-    sudo systemctl daemon-reload
-    ```
+3. Run the installation script as root:
+   ```bash
+   sudo ./install.sh
+   ```
 
-5. **Enable and Start the Service**:
-    ```sh
-    sudo systemctl enable correlate_blockings.service
-    sudo systemctl start correlate_blockings.service
-    ```
+4. The script will:
+   - Check for PiHole installation (native or Docker)
+   - Ask for installation path (default: `/opt/pihole/correlate_blockings.py`)
+   - Set up the systemd service
+   - Start the service automatically
 
-6. **Check the Service Status**:
-    ```sh
-    sudo systemctl status correlate_blockings.service
-    ```
+### Manual Installation
+
+1. Copy the Python script to your desired location:
+   ```bash
+   sudo cp correlate_blockings.py /opt/pihole/
+   sudo chmod +x /opt/pihole/correlate_blockings.py
+   ```
+
+2. Copy the service file:
+   ```bash
+   sudo cp correlate_blockings.service /etc/systemd/system/
+   ```
+
+3. Enable and start the service:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable correlate_blockings.service
+   sudo systemctl start correlate_blockings.service
+   ```
 
 ## Usage
 
-The script will automatically start on boot and monitor the PiHole log file located at `/opt/pihole/log-pihole/pihole.log`. It will log domain block correlations to `/opt/pihole/log-pihole/blockings.log`.
+The script runs automatically as a service and writes correlated logs to `/opt/pihole/log-pihole/blockings.log`.
 
-### Customization
+To check the service status:
+```bash
+sudo systemctl status correlate_blockings.service
+```
 
-You may need to adjust the script location, input file name, and output file name within the script to meet your individual environment. Modify the following variables in `correlate_blockings.py` as needed:
-- `logfile_path`: Path to the PiHole log file.
-- `output_file_path`: Path to the output log file.
+To view the logs:
+```bash
+tail -f /opt/pihole/log-pihole/blockings.log
+```
 
-## Contributing
+## Requirements
 
-Feel free to submit issues or pull requests if you have any improvements or bug fixes.
+- Python 3
+- PiHole (native installation or Docker container)
+- systemd-based Linux system
+- Root privileges for installation
+
+## Troubleshooting
+
+If the service fails to start:
+1. Check the service status: `sudo systemctl status correlate_blockings.service`
+2. Check the logs: `journalctl -u correlate_blockings.service`
+3. Verify PiHole is running and accessible
+4. Ensure the log directory exists and has proper permissions
 
 ## License
 
