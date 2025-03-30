@@ -3,17 +3,28 @@
 import time
 import re
 import os
+import stat
+
+def get_file_size(filepath):
+    try:
+        return os.stat(filepath).st_size
+    except OSError:
+        return 0
 
 def follow(file, filepath):
     file.seek(0, 2)  # Move to the end of the file
+    last_size = get_file_size(filepath)
+    
     while True:
         try:
             line = file.readline()
             if not line:
-                # Check if the file has been rotated
-                if not os.path.exists(filepath):
+                # Check if file has been rotated
+                current_size = get_file_size(filepath)
+                if current_size < last_size:
                     print(f"Log file {filepath} has been rotated, reopening...")
                     return None
+                last_size = current_size
                 time.sleep(0.1)  # Sleep briefly
                 continue
             yield line
